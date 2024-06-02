@@ -2,13 +2,11 @@ const express = require('express');
 const path = require('path');
 const app = express();
 const sq = require('./backend/util/database');
-const User=require('./backend/model/user');
-const Expense=require('./backend/model/expense');
 const Router = require('./backend/routes/router');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
-app.use(bodyParser.json({ extended: false }));
+app.use(bodyParser.json());
 app.use(cors());
 app.use(Router);
 
@@ -16,8 +14,8 @@ app.use(Router);
 app.use('/frontend', express.static(path.join(__dirname, 'frontend')));
 
 sq.sync()
-  .then(response => {
-    console.log('Database synced:', response);
+  .then(() => {
+    console.log('Database synced');
   })
   .catch(err => {
     console.log('Database sync error:', err);

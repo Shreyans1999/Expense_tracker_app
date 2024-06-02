@@ -2,92 +2,83 @@ const { response } = require("express");
 const User = require("../model/user");
 const Expense = require("../model/expense");
 const bcrypt = require("bcrypt");
-const expenses = require("../model/expense");
 
 exports.register = (req, res, next) => {
-  const name = req.body.name;
-  const email = req.body.email;
-  const password = req.body.password;
+  const { name, email, password } = req.body;
   bcrypt.hash(password, 10, async (err, hash) => {
-    console.log(err);
-    await User.create({
-      name: name,
-      email: email,
-      password: hash,
-    })
-      .then((data) => {
-        console.log(data);
-        res.status(201).json({ User: data });
-      })
-      .catch((err) => console.log(err));
+    if (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Server error" });
+    }
+    try {
+      const user = await User.create({ name, email, password: hash });
+      res.status(201).json({ User: user });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: "Database error" });
+    }
   });
 };
 
-exports.Login = (req, res, next) => {
-  const email = req.params.email;
-  const password = req.body.password;
-  // console.log(`firts pass is ${password}`);
-  User.findAll({ where: { email: email } })
+exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+  User.findOne({ where: { email } })
     .then((user) => {
-      if (user.length > 0) {
-        bcrypt.compare(password, user[0].password, (err, result) => {
-          if (err) {
-            res
-              .status(500)
-              .json({ success: false, message: "Something went wrong" });
-          }
-          if (result == true) {
-            //console.log(`second pass is ${user[0].password}`);
-            res.status(201).json({ message: "Login Successfull" });
-          } else {
-            res.status(401).json({ message: "Incorrect Password" });
-          }
-        });
-      } else {
-        res.status(404).json({ message: "user not found" });
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
       }
+      bcrypt.compare(password, user.password, (err, result) => {
+        if (err) {
+          return res.status(500).json({ success: false, message: "Server error" });
+        }
+        if (result) {
+          res.status(200).json({ message: "Login Successful" });
+        } else {
+          res.status(401).json({ message: "Incorrect Password" });
+        }
+      });
     })
     .catch((err) => {
       console.log(err);
+      res.status(500).json({ error: "Database error" });
     });
 };
 
-exports.AddExpense = (req, res, next) => {
-  const money = req.body.money;
-  const description = req.body.description;
-  const category = req.body.category;
-  Expense.create({
-    money: money,
-    description: description,
-    category: category,
-  })
+exports.addExpense = (req, res, next) => {
+  const { money, description, category } = req.body;
+  Expense.create({ money, description, category })
     .then((data) => {
-      console.log(data);
       res.status(201).json({ Expense: data });
     })
     .catch((err) => {
       console.log(err);
+      res.status(500).json({ error: "Database error" });
     });
 };
 
-exports.ShowExpense = (req, res, next) => {
+exports.showExpense = (req, res, next) => {
   Expense.findAll()
     .then((expenses) => {
-      console.log(expenses);
-      res.status(201).json({ expenses });
+      res.status(200).json({ expenses });
     })
     .catch((err) => {
       console.log(err);
+      res.status(500).json({ error: "Database error" });
     });
 };
 
-exports.DeleteExpense = (req, res, next) => {
-  const uId = req.params.id;
-  console.log(uId);
-  Expense.destroy({ where: { id: uId } })
+exports.deleteExpense = (req, res, next) => {
+  const { id } = req.params;
+  Expense.destroy({ where: { id } })
     .then((result) => {
-      console.log(result);
-      res.status(201).json({ message: "Successfull" });
+      if (result) {
+        res.status(200).json({ message: "Expense deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Expense not found" });
+      }
     })
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+      res.status(500).json({ error: "Database error" });
+    });
 };
