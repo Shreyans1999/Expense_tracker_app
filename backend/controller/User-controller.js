@@ -22,15 +22,18 @@ exports.register = (req, res, next) => {
 
 exports.login = (req, res, next) => {
   const { email, password } = req.body;
+  
   User.findOne({ where: { email } })
     .then((user) => {
       if (!user) {
         return res.status(404).json({ message: "User not found" });
       }
+
       bcrypt.compare(password, user.password, (err, result) => {
         if (err) {
           return res.status(500).json({ success: false, message: "Server error" });
         }
+
         if (result) {
           res.status(200).json({ message: "Login Successful" });
         } else {
