@@ -1,87 +1,76 @@
-const { response } = require("express");
-const User = require("../model/user");
-const Expense = require("../model/expense");
-const bcrypt = require("bcrypt");
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const User = require('../model/user');
+const Expense = require('../model/expense');
 
-exports.register = (req, res, next) => {
-  const { name, email, password } = req.body;
-  bcrypt.hash(password, 10, async (err, hash) => {
-    if (err) {
-      console.log(err);
-      return res.status(500).json({ error: "Server error" });
-    }
+exports.register = async (req, res, next) => {
+    const { name, email, password } = req.body;
     try {
-      const user = await User.create({ name, email, password: hash });
-      res.status(201).json({ User: user });
-    } catch (error) {
-      console.log(error);
-      res.status(500).json({ error: "Database error" });
+        const hash = await bcrypt.hash(password, 10);
+        const data = await User.create({ name, email, password: hash });
+        res.status(201).json({ User: data });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
     }
-  });
 };
 
-exports.login = (req, res, next) => {
-  const { email, password } = req.body;
-  
-  User.findOne({ where: { email } })
-    .then((user) => {
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
+function generateAccessToken(id) {
+    return jwt.sign({ userId: id }, "magical-key-for-userAuthentication");
+}
 
-      bcrypt.compare(password, user.password, (err, result) => {
-        if (err) {
-          return res.status(500).json({ success: false, message: "Server error" });
-        }
-
-        if (result) {
-          res.status(200).json({ message: "Login Successful" });
+exports.Login = async (req, res, next) => {
+    const { email, password } = req.body;
+    try {
+        const user = await User.findAll({ where: { email } });
+        if (user.length > 0) {
+            const result = await bcrypt.compare(password, user[0].password);
+            if (result) {
+                res.status(201).json({
+                    message: "Login Successful",
+                    token: generateAccessToken(user[0].id),
+                });
+            } else {
+                res.status(401).json({ message: "Incorrect Password" });
+            }
         } else {
-          res.status(401).json({ message: "Incorrect Password" });
+            res.status(404).json({ message: "User not found" });
         }
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: "Database error" });
-    });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
 };
 
-exports.addExpense = (req, res, next) => {
-  const { money, description, category } = req.body;
-  Expense.create({ money, description, category })
-    .then((data) => {
-      res.status(201).json({ Expense: data });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: "Database error" });
-    });
+exports.AddExpense = async (req, res, next) => {
+    const { money, description, category } = req.body;
+    const userId = req.user.id;
+    try {
+        const data = await Expense.create({ money, description, category, UserId: userId });
+        res.status(201).json({ Expense: data });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
 };
 
-exports.showExpense = (req, res, next) => {
-  Expense.findAll()
-    .then((expenses) => {
-      res.status(200).json({ expenses });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: "Database error" });
-    });
+exports.ShowExpense = async (req, res, next) => {
+    try {
+        const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
+        res.status(201).json({ expenses });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
 };
 
-exports.deleteExpense = (req, res, next) => {
-  const { id } = req.params;
-  Expense.destroy({ where: { id } })
-    .then((result) => {
-      if (result) {
-        res.status(200).json({ message: "Expense deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Expense not found" });
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-      res.status(500).json({ error: "Database error" });
-    });
+exports.DeleteExpense = async (req, res, next) => {
+    const expenseId = req.params.id;
+    try {
+        await Expense.destroy({ where: { id: expenseId } });
+        res.status(201).json({ message: "Successfully deleted" });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: err.message });
+    }
 };
