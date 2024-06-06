@@ -1,29 +1,69 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Expense Tracker</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Main Screen</title>
-</head>
+  <body class="bg-gray-900 text-white">
+    <div class="max-w-md mx-auto p-8">
+      <form id="expense-form">
+        <div class="mb-4">
+          <label for="money" class="block mb-2">Amount:</label>
+          <input
+            type="text"
+            id="money"
+            class="w-full bg-gray-700 border border-gray-600 rounded py-2 px-3 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="description" class="block mb-2">Description:</label>
+          <input
+            type="text"
+            id="description"
+            class="w-full bg-gray-700 border border-gray-600 rounded py-2 px-3 focus:outline-none focus:border-blue-500"
+          />
+        </div>
+        <div class="mb-4">
+          <label for="category" class="block mb-2">Category:</label>
+          <select
+            id="category"
+            class="w-full bg-gray-700 border border-gray-600 rounded py-2 px-3 focus:outline-none focus:border-blue-500"
+          >
+            <option>Food</option>
+            <option>Clothes</option>
+            <option>Rent</option>
+          </select>
+        </div>
+        <button
+          type="submit"
+          id="submit"
+          class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none"
+        >
+          Add Expense
+        </button>
+      </form>
 
-<body>
-    <form>
-        <label for="money">Amount:</label>
-        <input type="text" id="money" required>
-        <label for="description">Description:</label>
-        <input type="text" id="description" required>
-        <label for="category">Category:</label>
-        <select id="category" required>
-            <option value="Food">Food</option>
-            <option value="Clothes">Clothes</option>
-            <option value="Rent">Rent</option>
-        </select>
-        <button type="submit" id="submit">Add Expense</button>
-    </form>
-    <ul id="Expense"></ul>
-    <script src="main.js"></script>
+      <div class="mt-6 bg-gray-800 rounded-lg p-4">
+        <h3 class="text-xl font-semibold mb-4">Expenses</h3>
+        <ul id="Expense">
+          <!-- Expense items will be dynamically added here -->
+        </ul>
+      </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"></script>
-</body>
-
+    <script>
+      document.getElementById('expense-form').addEventListener('submit', function(event) {
+        event.preventDefault();
+        // Your add expense logic here
+      });
+    </script>
+    <script src="main.js"></script>
+  </body>
 </html>
