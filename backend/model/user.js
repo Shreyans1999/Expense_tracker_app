@@ -1,31 +1,29 @@
-const { Sequelize } = require('sequelize');
-const sq = require('../util/database');
-const Expense = require('./expense'); // Import the Expense model
+const {Sequelize}=require('sequelize');
 
-const User = sq.define('User', {
-  id: {
-    type: Sequelize.INTEGER,
-    autoIncrement: true,
-    allowNull: false,
-    primaryKey: true
-  },
-  name: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  email: {
-    type: Sequelize.STRING,
-    allowNull: false,
-    unique: true
-  },
-  password: {
-    type: Sequelize.STRING,
-    allowNull: false
-  }
-});
+const sq=require('../util/database');
 
-// Define associations
-User.hasMany(Expense, { foreignKey: 'UserId' });
-Expense.belongsTo(User, { foreignKey: 'UserId' });
+const User=sq.define('User',{
+id:{
+    type:Sequelize.INTEGER,
+    autoIncrement:true,
+    allowNull:false,
+    primaryKey:true
+},
+name:{
+    type:Sequelize.STRING,
+    allowNull:false 
+},
+email:{
+type:Sequelize.STRING,
+allowNull:false
+},
+password:{
+    type:Sequelize.STRING,
+    allowNull:false
+},
+premium:{
+    type:Sequelize.BOOLEAN
+}
+})
 
-module.exports = User;
+module.exports=User

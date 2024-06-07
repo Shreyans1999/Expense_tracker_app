@@ -1,65 +1,66 @@
-document.getElementById("submit").addEventListener("click", function (event) {
+const btn = document.getElementById("submit");
+
+btn.addEventListener("click", function (event) {
   event.preventDefault();
   const money = document.getElementById("money").value;
   const description = document.getElementById("description").value;
   const category = document.getElementById("category").value;
 
-  const expense = {
+  const Exp = {
     money: money,
     description: description,
     category: category,
   };
-
   const token = localStorage.getItem("token");
-
   axios
-    .post("http://localhost:3000/add-expense", expense, {
+    .post("http://localhost:3000/add-expense", Exp, {
       headers: { Authorization: token },
     })
     .then((response) => {
       console.log(response);
       location.reload();
     })
-    .catch((err) => {
-      console.log(err);
+    .catch((Err) => {
+      console.log(Err);
     });
 });
 
 window.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
+  console.log(token);
   axios
     .get("http://localhost:3000/get-expense", {
       headers: { Authorization: token },
     })
     .then((response) => {
       console.log(response);
-      response.data.expenses.forEach((expense) => {
-        showExpense(expense);
-      });
+      for (var i = 0; i < response.data.expenses.length; i++) {
+        showUser(response.data.expenses[i]);
+      }
     })
     .catch((err) => {
       console.log(err);
     });
 });
 
-function showExpense(expense) {
-  const expenseList = document.getElementById("Expense");
-  const listItem = document.createElement("li");
-  const deleteBtn = document.createElement("button");
+function showUser(expense) {
+  const Expense = document.getElementById("Expense");
+  const list = document.createElement("li");
+  const delBTN = document.createElement("button");
+  list.id = `${expense.id}`;
+  console.log(expense.id);
+  delBTN.innerText = "Delete";
+  list.textContent = `${expense.money}-${expense.description}-${expense.category} `;
+  Expense.appendChild(list);
+  list.appendChild(delBTN);
 
-  listItem.id = `${expense.id}`;
-  deleteBtn.innerText = "Delete";
-  listItem.textContent = `${expense.money} - ${expense.description} - ${expense.category} `;
-  expenseList.appendChild(listItem);
-  listItem.appendChild(deleteBtn);
-
-  deleteBtn.addEventListener("click", function () {
-    const token = localStorage.getItem("token");
+  delBTN.addEventListener("click", function () {
     axios
-      .delete(`http://localhost:3000/delete-expense/${listItem.id}`, {
-        headers: { Authorization: token },
-      })
+      .delete(`http://localhost:3000/delete-expense/${list.id}`)
       .then(() => {
+        //const child = document.getElementById("list.id");
+        //Expense.removeChild(child);
+        console.log("refresh ho raha");
         location.reload();
       })
       .catch((err) => {
@@ -67,3 +68,50 @@ function showExpense(expense) {
       });
   });
 }
+
+const Premium = document.getElementById("Buy");
+
+Premium.addEventListener("click", function (event) {
+  const token = localStorage.getItem("token");
+  axios
+    .get("http://localhost:3000/Premium-Membership", {
+      headers: { Authorization: token },
+    })
+    .then((response) => {
+      console.log("jhatu code");
+      console.log(response);
+      var options = {
+        key: response.data.key_id,
+        order_id: response.data.order.id,
+        handler: function (response) {
+          axios
+            .post(
+              "http://localhost:3000/Transaction-Status",
+              {
+                order_id: options.order_id,
+                payment_id: response.razorpay_payment_id,
+              },
+              { headers: { Authorization: token } }
+            )
+            .then(() => {
+              alert("You are premium user now");
+              //console.log("remove ho jao")
+              Premium.remove();
+            })
+            .catch((err) => {
+              console.log(err);
+            });
+        },
+      };
+      const Razor = new Razorpay(options);
+      Razor.open();
+      Razor.on("payment.failed", function () {
+        alert("Something went wrong");
+      });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+ 
+  event.preventDefault();
+});

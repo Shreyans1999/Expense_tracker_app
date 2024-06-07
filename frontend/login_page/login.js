@@ -1,5 +1,6 @@
-const submitBtn = document.getElementById('submit');
-submitBtn.addEventListener('click', function (event) {
+
+const SubmitBtn = document.getElementById('submit');
+SubmitBtn.addEventListener('click', function (event) {
     event.preventDefault();
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -7,12 +8,16 @@ submitBtn.addEventListener('click', function (event) {
     const login = {
         email: email,
         password: password
-    };
+    }
     
-    axios.post('http://localhost:3000/login-user', login).then((response) => {
-        localStorage.setItem('token', response.data.token);
-        window.location.href = "../main_screen/main.html";
+    axios.post(`http://localhost:3000/login-user/${login.email}`, login).then((response) => {
+        console.log(response.data.token);
+
+        localStorage.setItem('token', response.data.token)
+        window.location.href="../main_screen/main.html"
     }).catch(err => {
-        console.log(err);
-    });
-});
+        console.log(err)
+    })
+    console.log(login.email)
+    console.log(login.password)
+})

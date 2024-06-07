@@ -1,76 +1,157 @@
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const User = require('../model/user');
-const Expense = require('../model/expense');
+const { response } = require("express");
+const User = require("../model/user");
+const Expense = require("../model/expense");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const { where } = require("sequelize");
+const RazorPay = require("razorpay");
+const Order = require("../model/orders");
 
-exports.register = async (req, res, next) => {
-    const { name, email, password } = req.body;
-    try {
-        const hash = await bcrypt.hash(password, 10);
-        const data = await User.create({ name, email, password: hash });
+exports.register = (req, res, next) => {
+  const name = req.body.name;
+  const email = req.body.email;
+  const password = req.body.password;
+  bcrypt.hash(password, 10, async (err, hash) => {
+    console.log(err);
+    await User.create({
+      name: name,
+      email: email,
+      password: hash,
+    })
+      .then((data) => {
+        //console.log(data);
         res.status(201).json({ User: data });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
-    }
+      })
+      .catch((err) => console.log(err));
+  });
 };
 
 function generateAccessToken(id) {
-    return jwt.sign({ userId: id }, "magical-key-for-userAuthentication");
+  return jwt.sign({ userId: id }, "magical-key-for-userAuthentication");
 }
 
-exports.Login = async (req, res, next) => {
-    const { email, password } = req.body;
-    try {
-        const user = await User.findAll({ where: { email } });
-        if (user.length > 0) {
-            const result = await bcrypt.compare(password, user[0].password);
-            if (result) {
-                res.status(201).json({
-                    message: "Login Successful",
-                    token: generateAccessToken(user[0].id),
-                });
-            } else {
-                res.status(401).json({ message: "Incorrect Password" });
-            }
-        } else {
-            res.status(404).json({ message: "User not found" });
-        }
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
-    }
+exports.Login = (req, res, next) => {
+  const email = req.params.email;
+  const password = req.body.password;
+  // console.log(`firts pass is ${password}`);
+  User.findAll({ where: { email: email } })
+    .then((user) => {
+      if (user.length > 0) {
+        bcrypt.compare(password, user[0].password, (err, result) => {
+          if (err) {
+            res
+              .status(500)
+              .json({ success: false, message: "Something went wrong" });
+          }
+          if (result == true) {
+            //console.log(`second pass is ${user[0].password}`);
+            res.status(201).json({
+              message: "Login Successfull",
+              token: generateAccessToken(user[0].id),
+            });
+          } else {
+            res.status(401).json({ message: "Incorrect Password" });
+          }
+        });
+      } else {
+        res.status(404).json({ message: "user not found" });
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
-exports.AddExpense = async (req, res, next) => {
-    const { money, description, category } = req.body;
-    const userId = req.user.id;
-    try {
-        const data = await Expense.create({ money, description, category, UserId: userId });
-        res.status(201).json({ Expense: data });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
-    }
+exports.AddExpense = (req, res, next) => {
+  const money = req.body.money;
+  const description = req.body.description;
+  const category = req.body.category;
+  const uId = req.user.id;
+  Expense.create({
+    money: money,
+    description: description,
+    category: category,
+    UserId: uId,
+  })
+    .then((data) => {
+      //console.log(data);
+      res.status(201).json({ Expense: data });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
-exports.ShowExpense = async (req, res, next) => {
-    try {
-        const expenses = await Expense.findAll({ where: { UserId: req.user.id } });
-        res.status(201).json({ expenses });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
-    }
+exports.ShowExpense = (req, res, next) => {
+  Expense.findAll({ where: { userId: req.user.id } })
+    .then((expenses) => {
+      //console.log(expenses);
+      res.status(201).json({ expenses });
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
-exports.DeleteExpense = async (req, res, next) => {
-    const expenseId = req.params.id;
-    try {
-        await Expense.destroy({ where: { id: expenseId } });
-        res.status(201).json({ message: "Successfully deleted" });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
-    }
+exports.DeleteExpense = (req, res, next) => {
+  const uId = req.params.id;
+  //console.log(uId);
+  Expense.destroy({ where: { id: uId } })
+    .then((result) => {
+      //console.log(result);
+      res.status(201).json({ message: "Successfull" });
+    })
+    .catch((err) => console.log(err));
 };
+
+exports.PurchasePremium = (req, res, next) => {
+  const uId = req.user.id;
+  try {
+    var rzp = new RazorPay({
+      key_id: "rzp_test_0W9YlvayxPcWsK",
+      key_secret: "UrcNT7YtipPUGguba2El7LZ0",
+    });
+    const amount = 6900;
+    rzp.orders.create({ amount, currency: "INR" }, (err, order) => {
+      if(err){
+        throw new Error(JSON.stringify(err))
+      }
+      console.log(`premium purchse==${order}`)
+      Order.create({ orderId: order.id, status: "PENDING" ,UserId:uId})
+        .then(() => {
+          console.log(`chal le bsdk ${order,rzp.key_id}`)
+          return res.status(201).json({ order, key_id: rzp.key_id });
+        })
+        .catch((err) => {
+          throw new Error(err);
+        });
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(403).json({message:"Something went wrong",error:err})
+  }
+};
+
+exports.UpdateTransactionStatus = (req, res) => {
+  try{
+    const uId = req.user.id;
+    const{payment_id,order_id}=req.body;
+    Order.findOne({where:{orderId:order_id}}).then((order)=>{
+      order.update({paymentId:payment_id,status:"SUCCESSFULL"}).then(()=>{
+        User.update({premium:true},{where:{id:uId}}).then(()=>{
+          return res.status(202).json({success:true,message:"Transaction completed"})
+        }).catch(err=>{
+          console.log(err)
+        })
+      }).catch(err=>{
+        console.log(err)
+      })
+    }).catch(err=>{
+      console.log(err)
+    })
+  }
+  catch(err){
+    console.log(err)
+  }
+  };
+  

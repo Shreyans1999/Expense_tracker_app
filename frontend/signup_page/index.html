@@ -10,7 +10,7 @@
 
 <body class="bg-gray-900 flex items-center justify-center h-screen">
     <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-80">
-        <form id="signup-form" class="text-gray-300">
+        <form class="text-gray-300" id="signup-form">
             <h2 class="text-2xl font-semibold mb-6">Don't Have Account?</h2>
             <div class="mb-4">
                 <label for="name" class="block mb-1">Your Name:</label>
@@ -25,17 +25,12 @@
                 <input type="password" id="password" placeholder="Enter your password" class="w-full bg-gray-700 border border-gray-600 rounded py-2 px-3 focus:outline-none focus:border-blue-500">
             </div>
             <button class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none" id="submit" type="submit">Sign Up</button>
-            <p class="mt-4 text-sm">Already have an account? <a href="../login_page/login.html" class="text-blue-400 hover:text-blue-300">Login Here</a></p>
+            <p class="mt-4 text-sm">Already have an account? <a href="../login_page/login.html" class="text-blue-400 hover:text-blue-300">Login Here</a>
+            </p>
         </form>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.7/axios.min.js"></script>
-    <script>
-        document.getElementById('signup-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            // Your signup logic here
-        });
-    </script>
     <script src="script.js"></script>
 </body>
 

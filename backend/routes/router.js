@@ -1,12 +1,20 @@
-const express = require('express');
-const router = express.Router();
-const UserController = require('../controller/User-controller');
-const userAuthenticator = require('../middleware/auth');
+const express=require('express');
+const Router =express.Router()
+const UserControll=require('../controller/User-controller');
+const userAuthenticator=require('../middleware/auth');
 
-router.post('/register-user', UserController.register);
-router.post('/login-user', UserController.Login);
-router.post('/add-expense', userAuthenticator.authenticator, UserController.AddExpense);
-router.get('/get-expense', userAuthenticator.authenticator, UserController.ShowExpense);
-router.delete('/delete-expense/:id', userAuthenticator.authenticator, UserController.DeleteExpense);
+Router.post('/register-user',UserControll.register);
 
-module.exports = router;
+Router.post('/login-user/:email',UserControll.Login);
+
+Router.post('/add-expense',userAuthenticator.authenticator,UserControll.AddExpense);
+
+Router.get('/get-expense' ,userAuthenticator.authenticator , UserControll.ShowExpense);
+
+Router.delete('/delete-expense/:id',UserControll.DeleteExpense);
+
+Router.use('/Premium-Membership',userAuthenticator.authenticator,UserControll.PurchasePremium);
+
+Router.post('/Transaction-Status',userAuthenticator.authenticator,UserControll.UpdateTransactionStatus);
+
+module.exports=Router;
