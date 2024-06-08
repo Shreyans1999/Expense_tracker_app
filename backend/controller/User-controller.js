@@ -31,7 +31,7 @@ function generateAccessToken(id,premium) {
 }
 
 exports.Login = (req, res, next) => {
-  const email = req.params.email;
+  const email = req.body.email;
   const password = req.body.password;
   // console.log(`firts pass is ${password}`);
   User.findAll({ where: { email: email } })
@@ -47,7 +47,7 @@ exports.Login = (req, res, next) => {
             //console.log(`second pass is ${user[0].password}`);
             res.status(201).json({
               message: "Login Successfull",
-              token: generateAccessToken(user[0].id,user[0].premium),
+              token: generateAccessToken(user[0].id, user[0].premium),
             });
           } else {
             res.status(401).json({ message: "Incorrect Password" });

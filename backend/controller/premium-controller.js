@@ -1,30 +1,28 @@
 const User = require("../model/user");
 const Expense = require("../model/expense");
+const sequelize = require("../util/database");
+const expenses = require("../model/expense");
 
 exports.ShowLeaderBoard = async (req, res) => {
   try {
-    const users = await User.findAll();
-    const expenses = await Expense.findAll();
-    const TotalExpense = {};
-
-    expenses.forEach((expense) => {
-      if (TotalExpense[expense.UserId]) {
-        TotalExpense[expense.UserId] += expense.money;
-      } else {
-        TotalExpense[expense.UserId] = expense.money;
-      }
+    const Leaderboard = await User.findAll({
+      attributes: [
+        "id",
+        "name",
+        [sequelize.fn("sum", sequelize.col("expenses.money")), "totalCost"],
+      ],
+      include: [
+        {
+          model: Expense,
+          attributes: [],
+        },
+      ],
+      group: ["User.id"], // Fixing typo here
+      order: [["totalCost", "DESC"]],
     });
-
-    const Leaderboard = users.map((user) => ({
-      name: user.name,
-      totalCost: TotalExpense[user.id] || 0,
-    }));
-
-    Leaderboard.sort((a, b) => b.totalCost - a.totalCost);
 
     res.status(200).json(Leaderboard);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ message: "Failed to retrieve leaderboard" });
   }
 };
