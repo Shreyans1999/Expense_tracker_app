@@ -27,7 +27,12 @@ btn.addEventListener("click", function (event) {
 
 window.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
-  console.log(token);
+  const decodeToken = parseJwt(token);
+  const Ispremium = decodeToken.premium;
+  if (Ispremium) {
+    premiumUserUi();
+    showLeaderBoard();
+  }
   axios
     .get("http://localhost:3000/get-expense", {
       headers: { Authorization: token },
@@ -43,12 +48,18 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+function premiumUserUi() {
+  const Premium = document.getElementById("Buy");
+  Premium.remove();
+  const message = document.getElementById("message");
+  message.textContent = "You are a Premium User";
+}
+
 function showUser(expense) {
   const Expense = document.getElementById("Expense");
   const list = document.createElement("li");
   const delBTN = document.createElement("button");
   list.id = `${expense.id}`;
-  console.log(expense.id);
   delBTN.innerText = "Delete";
   list.textContent = `${expense.money}-${expense.description}-${expense.category} `;
   Expense.appendChild(list);
@@ -58,9 +69,6 @@ function showUser(expense) {
     axios
       .delete(`http://localhost:3000/delete-expense/${list.id}`)
       .then(() => {
-        //const child = document.getElementById("list.id");
-        //Expense.removeChild(child);
-        console.log("refresh ho raha");
         location.reload();
       })
       .catch((err) => {
@@ -74,12 +82,10 @@ const Premium = document.getElementById("Buy");
 Premium.addEventListener("click", function (event) {
   const token = localStorage.getItem("token");
   axios
-    .get("http://localhost:3000/Premium-Membership", {
+    .post("http://localhost:3000/Premium-Membership", {}, {
       headers: { Authorization: token },
     })
     .then((response) => {
-      console.log("jhatu code");
-      console.log(response);
       var options = {
         key: response.data.key_id,
         order_id: response.data.order.id,
@@ -93,10 +99,11 @@ Premium.addEventListener("click", function (event) {
               },
               { headers: { Authorization: token } }
             )
-            .then(() => {
+            .then((response) => {
               alert("You are premium user now");
-              //console.log("remove ho jao")
-              Premium.remove();
+              localStorage.setItem("token", response.data.token);
+              premiumUserUi();
+              showLeaderBoard();
             })
             .catch((err) => {
               console.log(err);
@@ -112,6 +119,44 @@ Premium.addEventListener("click", function (event) {
     .catch((err) => {
       console.log(err);
     });
- 
+
   event.preventDefault();
 });
+
+function parseJwt(token) {
+  var base64Url = token.split(".")[1];
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  var jsonPayload = decodeURIComponent(
+    window
+      .atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
+
+function showLeaderBoard() {
+  const BTN = document.createElement("button");
+  BTN.id = "pre";
+  BTN.textContent = "Show Leaderboard";
+  BTN.onclick = async () => {
+    const token = localStorage.getItem("token");
+    const LeaderboardArray = await axios.get(
+      "http://localhost:3000/showLeaderBoard",
+      { headers: { Authorization: token } }
+    );
+    console.log(LeaderboardArray);
+    const main = document.getElementById("leaderboard");
+    main.innerHTML = `<h1>Leader Board</h1>`;
+    LeaderboardArray.data.forEach((userDetails) => {
+      const li = document.createElement("li");
+      li.textContent = `Name: ${userDetails.name} Total Expenses: ${userDetails.totalCost}`;
+      main.appendChild(li);
+    });
+  };
+  document.getElementById("pre").appendChild(BTN);
+}
