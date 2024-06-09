@@ -24,11 +24,10 @@ btn.addEventListener("click", function (event) {
       console.log(Err);
     });
 });
+
 window.addEventListener("DOMContentLoaded", () => {
   const token = localStorage.getItem("token");
-  //console.log(token);
   const decodeToken = parseJwt(token);
-  //console.log(decodeToken);
   const Ispremium = decodeToken.premium;
   if (Ispremium) {
     premiumUserUi();
@@ -64,13 +63,9 @@ function showUser(expense) {
   console.log(expense.id);
   delBTN.innerText = "Delete";
   delBTN.style.color = "lightgray";
-
   delBTN.style.backgroundColor = "transparent";
-
   delBTN.style.border = "1px solid lightgray";
-
-  delBTN.style.cursor = "pointer"; 
-
+  delBTN.style.cursor = "pointer";
   delBTN.style.padding = "5px 10px";
   delBTN.style.margin = "5px";
   delBTN.addEventListener("mouseover", function () {
@@ -84,12 +79,12 @@ function showUser(expense) {
   list.appendChild(delBTN);
 
   delBTN.addEventListener("click", function () {
+    const token = localStorage.getItem("token");
     axios
-      .delete(`http://localhost:3000/delete-expense/${list.id}`)
+      .delete(`http://localhost:3000/delete-expense/${list.id}`, {
+        headers: { Authorization: token },
+      })
       .then(() => {
-        //const child = document.getElementById("list.id");
-        //Expense.removeChild(child);
-        //console.log("refresh ho raha");
         location.reload();
       })
       .catch((err) => {
@@ -185,10 +180,8 @@ function showLeaderBoard() {
       let usersHTML = "";
       LeaderboardArray.data.forEach((userDetails) => {
         console.log(userDetails);
-
         usersHTML += `<li>Name-${userDetails.name} Total Expenses-${userDetails.totalCost}</li>`;
       });
-
       main.innerHTML += usersHTML;
     } catch (error) {
       console.error("Error fetching leaderboard:", error);

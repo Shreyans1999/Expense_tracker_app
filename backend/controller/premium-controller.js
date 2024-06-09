@@ -17,10 +17,10 @@ exports.ShowLeaderBoard = async (req, res) => {
           attributes: [],
         },
       ],
-      group: ["User.id"], // Fixing typo here
+      group: ["User.id"],
       order: [["totalCost", "DESC"]],
     });
-
+    console.log(Leaderboard);
     res.status(200).json(Leaderboard);
   } catch (err) {
     console.log(err);

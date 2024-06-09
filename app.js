@@ -18,7 +18,7 @@ Expense.belongsTo(User);
 User.hasMany(Order);
 Order.belongsTo(User);
 
-sq.sync()
+sq.sync({ force: true })
   .then(() => {
     console.log('Database synchronized');
     app.listen(3000, () => {
