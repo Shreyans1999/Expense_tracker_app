@@ -92,7 +92,27 @@ function premiumUserUi() {
         }
       })
       .catch(console.log);
+      axios
+      .get("http://localhost:3000/get-url", {
+        headers: { Authorization: token },
+      })
+      .then((result) => {
+        for(var j=0; j<result.data.Link.length; j++){
+          showUrl(result.data.Link[j])
+        }
+      }); 
   };
+}
+
+function showUrl(Links){
+  const parent=document.getElementById('listofUrl');
+  console.log(parent)
+  const child=document.createElement('li');
+  const CloseBtn=document.createElement('button');
+  CloseBtn.innerText="Close";
+  child.textContent=`Already Downloaded -${Links.Link}`;
+  parent.appendChild(child);
+  parent.appendChild(CloseBtn)
 }
 
 function showUser(expense) {
