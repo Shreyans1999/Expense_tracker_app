@@ -26,6 +26,7 @@ btn.addEventListener("click", function (event) {
 });
 
 window.addEventListener("DOMContentLoaded", () => {
+  const Expense = document.getElementById("Expense");
   const token = localStorage.getItem("token");
   const decodeToken = parseJwt(token);
   const Ispremium = decodeToken.premium;
@@ -33,19 +34,58 @@ window.addEventListener("DOMContentLoaded", () => {
     premiumUserUi();
     showLeaderBoard();
   }
-  axios
-    .get("http://localhost:3000/get-expense", {
-      headers: { Authorization: token },
-    })
-    .then((response) => {
-      console.log(response);
-      for (var i = 0; i < response.data.expenses.length; i++) {
-        showUser(response.data.expenses[i]);
-      }
-    })
-    .catch((err) => {
-      console.log(err);
+  let pageNumber = 1;
+  const paginationDiv = document.getElementById("paginationDiv");
+
+  function createPaginationButton(text, onClick) {
+    const button = document.createElement("button");
+    button.textContent = text;
+    button.className = "pagination-button";
+    button.onclick = onClick;
+    button.style.backgroundColor = "#4a5568"; // Dark gray
+    button.style.color = "#fff"; // White text
+    button.style.padding = "0.5rem 0.75rem"; // Padding
+    button.style.borderRadius = "0.25rem"; // Rounded corners
+    button.style.cursor = "pointer"; // Cursor pointer
+    button.style.margin = "0 0.25rem"; // Margin between buttons
+    button.addEventListener("mouseenter", () => {
+      button.style.backgroundColor = "#2d3748"; // Darker gray on hover
     });
+    button.addEventListener("mouseleave", () => {
+      button.style.backgroundColor = "#4a5568"; // Dark gray on mouse leave
+    });
+    return button;
+  }
+
+  function fetchExpenses(page) {
+    Expense.innerHTML = "";
+    axios
+      .get(`http://localhost:3000/get-expense?page=${page}`, {
+        headers: { Authorization: token },
+      })
+      .then((response) => {
+        console.log(response);
+        paginationDiv.innerHTML = "";
+        let data = response.data;
+
+        for (let i = 1; i <= data.lastPage; i++) {
+          const pageButton = createPaginationButton(i, function () {
+            pageNumber = i;
+            fetchExpenses(pageNumber);
+          });
+          paginationDiv.appendChild(pageButton);
+        }
+
+        for (let i = 0; i < response.data.expenses.length; i++) {
+          showUser(response.data.expenses[i]);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }
+
+  fetchExpenses(pageNumber);
 });
 
 function premiumUserUi() {
@@ -91,7 +131,9 @@ function premiumUserUi() {
           throw new Error("Server Error");
         }
       })
-      .catch(console.log);
+      .catch(err=>{
+        console.log(err)
+      })
       axios
       .get("http://localhost:3000/get-url", {
         headers: { Authorization: token },
@@ -116,7 +158,7 @@ function showUrl(Links){
 }
 
 function showUser(expense) {
-  const Expense = document.getElementById("Expense");
+  // const Expense = document.getElementById("Expense");
   const list = document.createElement("li");
   const delBTN = document.createElement("button");
   list.id = `${expense.id}`;
