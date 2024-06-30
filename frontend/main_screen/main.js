@@ -49,10 +49,50 @@ window.addEventListener("DOMContentLoaded", () => {
 });
 
 function premiumUserUi() {
-  const Premium = document.getElementById("Buy");
-  Premium.remove();
+  const premiumButton = document.getElementById("Buy");
+  premiumButton.remove();
+
   const message = document.getElementById("message");
   message.textContent = "You are a Premium User";
+
+  const downloadButton = document.createElement("button");
+  downloadButton.id = "downloadExpenses";
+  downloadButton.textContent = "Download Expenses";
+  downloadButton.classList.add(
+    "bg-gray-600",
+    "text-white",
+    "py-2",
+    "px-4",
+    "rounded",
+    "hover:bg-gray-700",
+    "focus:outline-none",
+    "mr-2",
+    "mt-4"
+  );
+  const form = document.querySelector("form");
+  form.appendChild(downloadButton);
+
+  document.getElementById("downloadExpenses").onclick = async function (e) {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+    await axios
+      .get("http://localhost:3000/download-expense", {
+        headers: { Authorization: token },
+      })
+      .then((response) => {
+        console.log(response);
+
+        if (response.status == 200) {
+          var a = document.createElement("a");
+          a.href = response.data.fileURl;
+          a.download = "myexpense.csv";
+          a.click();
+        } else {
+          throw new Error("Server Error");
+        }
+      })
+      .catch(console.log);
+  };
 }
 
 function showUser(expense) {

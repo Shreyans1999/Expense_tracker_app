@@ -16,5 +16,6 @@ Router.get('/showLeaderBoard', userAuthenticator.authenticator, Premium.ShowLead
 Router.post('/forget-password', userAuthenticator.authenticator, ForgetPassword.forgetPassword);
 Router.post('/reset-password/:uid', ForgetPassword.resetpassword);
 Router.post('/updatepassword/:resetpasswordid', ForgetPassword.updatepassword);
+Router.get('/download-expense',userAuthenticator.authenticator,UserControll.downloadExpense)
 
 module.exports = Router;

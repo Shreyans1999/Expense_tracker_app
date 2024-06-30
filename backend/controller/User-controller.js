@@ -7,6 +7,8 @@ const { where, Sequelize } = require("sequelize");
 const RazorPay = require("razorpay");
 const Order = require("../model/orders");
 const sequelize = require("../util/database");
+const { Body } = require("sib-api-v3-sdk");
+const S3Service = require("../service/s3");
 
 exports.register = (req, res, next) => {
   const name = req.body.name;
@@ -196,5 +198,20 @@ exports.UpdateTransactionStatus = (req, res) => {
       });
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.downloadExpense = async (req, res) => {
+  try {
+    const expenses = await req.user.getExpenses();
+    console.log(expenses);
+    const stringifyExpenses = JSON.stringify(expenses);
+    const userID = req.user.id;
+    const filename = `Expenses${userID}/${new Date()}.txt`;
+    const fileURl = await S3Service.uploadtoS3(stringifyExpenses, filename);
+    res.status(200).json({ fileURl });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ err: err });
   }
 };
