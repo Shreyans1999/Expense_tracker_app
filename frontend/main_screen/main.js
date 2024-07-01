@@ -165,11 +165,8 @@ function showUrl(Links){
   const parent=document.getElementById('listofUrl');
   console.log(parent)
   const child=document.createElement('li');
-  const CloseBtn=document.createElement('button');
-  CloseBtn.innerText="Close";
   child.textContent=`Already Downloaded -${Links.Link}`;
   parent.appendChild(child);
-  parent.appendChild(CloseBtn)
 }
 
 function showUser(expense) {

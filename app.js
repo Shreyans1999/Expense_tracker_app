@@ -6,14 +6,22 @@ const Expense = require('./backend/model/expense');
 const Order = require('./backend/model/orders');
 const Request = require('./backend/model/ForgotPasswordRequests');
 const FileUrl=require('./backend/model/fileUrl')
-const Router = require('./backend/routes/router');
+const UserRoute = require('./backend/routes/user-routes');
+const premiumRoute=require('./backend/routes/premium-routes');
+const forgetPass=require('./backend/routes/forget-pass-route');
+const expenseRoute=require('./backend/routes/expense-Routes');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 
 app.use(bodyParser.json({ extended: false }));
 app.use(cors());
 app.use('/frontend', express.static('frontend'));
-app.use(Router);
+
+//Route Configuration
+app.use(UserRoute);
+app.use(forgetPass);
+app.use(expenseRoute);
+app.use(premiumRoute);
 
 User.hasMany(Expense);
 Expense.belongsTo(User);

@@ -21,3 +21,10 @@ SubmitBtn.addEventListener("click", function (event) {
   console.log(login.email);
   console.log(login.password);
 });
+
+const forgetBTN = document.getElementById("forgot-password");
+forgetBTN.addEventListener("click", function (e) {
+  e.preventDefault();
+  console.log("test");
+  window.location.href = './forget-pass/forget.html'
+});
