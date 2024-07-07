@@ -160,8 +160,8 @@ exports.PurchasePremium = (req, res, next) => {
   const uId = req.user.id;
   try {
     var rzp = new RazorPay({
-      key_id: "rzp_test_0W9YlvayxPcWsK",
-      key_secret: "UrcNT7YtipPUGguba2El7LZ0",
+      key_id: process.env.RZP_KEY_ID,
+      key_secret: process.env.RZP_KEY_SECRET,
     });
     const amount = 6900;
     rzp.orders.create({ amount, currency: "INR" }, (err, order) => {
