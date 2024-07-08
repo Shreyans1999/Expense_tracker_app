@@ -13,7 +13,7 @@ btn.addEventListener("click", function (event) {
   };
   const token = localStorage.getItem("token");
   axios
-    .post("http://localhost:3000/add-expense", Exp, {
+    .post("https://localhost:3000/add-expense", Exp, {
       headers: { Authorization: token },
     })
     .then((response) => {
@@ -64,7 +64,7 @@ window.addEventListener("DOMContentLoaded", () => {
     Expense.innerHTML = "";
     axios
       .get(
-        `http://localhost:3000/get-expense?page=${page}&count=${count}`,
+        `https://localhost:3000/get-expense?page=${page}&count=${count}`,
         {
           headers: { Authorization: token },
         }
@@ -131,7 +131,7 @@ function premiumUserUi() {
     e.preventDefault();
     const token = localStorage.getItem("token");
     await axios
-      .get("http://localhost:3000/download-expense", {
+      .get("https://localhost:3000/download-expense", {
         headers: { Authorization: token },
       })
       .then((response) => {
@@ -150,7 +150,7 @@ function premiumUserUi() {
         console.log(err);
       });
       axios
-      .get("http://localhost:3000/get-url", {
+      .get("https://localhost:3000/get-url", {
         headers: { Authorization: token },
       })
       .then((result) => {
@@ -165,11 +165,8 @@ function showUrl(Links){
   const parent=document.getElementById('listofUrl');
   console.log(parent)
   const child=document.createElement('li');
-  const CloseBtn=document.createElement('button');
-  CloseBtn.innerText="Close";
   child.textContent=`Already Downloaded -${Links.Link}`;
   parent.appendChild(child);
-  parent.appendChild(CloseBtn)
 }
 
 function showUser(expense) {
@@ -198,7 +195,7 @@ function showUser(expense) {
   delBTN.addEventListener("click", function () {
     const token = localStorage.getItem("token");
     axios
-      .delete(`http://localhost:3000/delete-expense/${list.id}`, {
+      .delete(`https://localhost:3000/delete-expense/${list.id}`, {
         headers: { Authorization: token },
       })
       .then(() => {
@@ -215,7 +212,7 @@ const Premium = document.getElementById("Buy");
 Premium.addEventListener("click", function (event) {
   const token = localStorage.getItem("token");
   axios
-    .post("http://localhost:3000/Premium-Membership", {}, {
+    .post("https://localhost:3000/Premium-Membership", {}, {
       headers: { Authorization: token },
     })
     .then((response) => {
@@ -225,7 +222,7 @@ Premium.addEventListener("click", function (event) {
         handler: function (response) {
           axios
             .post(
-              "http://localhost:3000/Transaction-Status",
+              "https://localhost:3000/Transaction-Status",
               {
                 order_id: options.order_id,
                 payment_id: response.razorpay_payment_id,
@@ -288,7 +285,7 @@ function showLeaderBoard() {
     const token = localStorage.getItem("token");
     try {
       const LeaderboardArray = await axios.get(
-        "http://localhost:3000/showLeaderBoard",
+        "https://localhost:3000/showLeaderBoard",
         { headers: { Authorization: token } }
       );
       console.log(LeaderboardArray);
@@ -297,7 +294,7 @@ function showLeaderBoard() {
       let usersHTML = "";
       LeaderboardArray.data.forEach((userDetails) => {
         console.log(userDetails);
-        usersHTML += `<li>Name-${userDetails.name} Total Expenses-${userDetails.totalCost}</li>`;
+        usersHTML += `<li>Name-${userDetails.name} Total Expenses-${userDetails.total}</li>`;
       });
       main.innerHTML += usersHTML;
     } catch (error) {

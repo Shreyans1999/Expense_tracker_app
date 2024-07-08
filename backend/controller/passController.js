@@ -8,6 +8,12 @@ const ForgetPassword = require("../model/ForgotPasswordRequests");
 
 exports.forgetPassword = async (req, res) => {
   const mail = req.body.mail;
+  const user = await User.findOne({ where: { email:mail } });
+  if (!user) {
+    return res.status(404).json({
+      message: "This Email is not registered",
+    });
+  }
   console.log(mail);
   const client = Sib.ApiClient.instance;
   const apiKey = client.authentications["api-key"];
@@ -17,14 +23,15 @@ exports.forgetPassword = async (req, res) => {
   const sender = { email: "solutions9584@gmail.com" };
   const recievers = [{ email: mail }];
   const uid = uuidv4();
-  const UId = req.user.id;
+  const UId = user.dataValues.id
+  console.log(`id is -------${UId}`);
   await ForgetPassword.create({ id: uid, UserId: UId, active: true });
   
   TranEmailApi.sendTransacEmail({
     sender,
     to: recievers,
     subject: "Password Reset Mail",
-    textContent: `http://localhost:3000/reset-password/${uid}`,
+    textContent: `https://localhost:3000/reset-password/${uid}`,
   })
     .then(response => {
       console.log(response);

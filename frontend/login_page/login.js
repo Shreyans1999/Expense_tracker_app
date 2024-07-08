@@ -9,7 +9,7 @@ SubmitBtn.addEventListener("click", function (event) {
     password: password,
   };
 
-  axios.post(`http://localhost:3000/login-user/${login.email}`, login)
+  axios.post(`https://localhost:3000/login-user/${login.email}`, login)
     .then((response) => {
       console.log(response.data.token);
       localStorage.setItem("token", response.data.token);
@@ -20,4 +20,11 @@ SubmitBtn.addEventListener("click", function (event) {
     });
   console.log(login.email);
   console.log(login.password);
+});
+
+const forgetBTN = document.getElementById("forgot-password");
+forgetBTN.addEventListener("click", function (e) {
+  e.preventDefault();
+  console.log("test");
+  window.location.href = './forget -pass/forget.html'
 });
