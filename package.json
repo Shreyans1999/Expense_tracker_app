@@ -23,6 +23,7 @@
     "morgan": "^1.10.0",
     "mysql2": "^3.9.2",
     "nodemon": "^3.1.0",
+    "open": "^10.1.0",
     "razorpay": "^2.9.4",
     "sequelize": "^6.37.1",
     "sib-api-v3-sdk": "^8.5.0",
